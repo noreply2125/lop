@@ -3,6 +3,9 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
+		<!-- CSP -->
+		<meta http-equiv="Content-Security-Policy" content="img-src 'self'" />
+
 		<!--
 		ISSUE : you can not achieve this with HTML headers, to prevent browsers to use cache for index.html, define these on nodejs
 		for temporary solution without nodejs, reload page via Ctrl+F5
