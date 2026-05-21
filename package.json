@@ -5,6 +5,9 @@
 		"start": "node server.js",
 		"migrate": "sequelize db:migrate"
 	},
+	"dependencies": {
+  		"sequelize": "^6.0.0"
+	},
 	"name": "lop",
 	"description": "League of Players",
 	"version": "1.0.0",
