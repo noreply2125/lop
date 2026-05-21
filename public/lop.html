@@ -15,7 +15,7 @@
 		<link rel="icon" type="image/x-icon" href="favicon.ico" />
 
 		<!-- ISSUE : link .css behaves differently from inline css -->
-		<link rel="stylesheet" href="web_common.css" />
+		<link rel="stylesheet" href="_web_common.css" />
 
 		<style>
 			/* CONTAINER */
@@ -664,15 +664,15 @@
 		<!-- ISSUE : THE BELOW ORDER IS IMPORTANT FOR MOBILE CHROME, INSPECT VIA PC, AND USE THIS ORDER IN COMBINED lop.js TOO -->
 		<!-- ISSUE is bigger than that, mobile chrome can not do async .js include, use our loadScriptAll() as sync true -->
 		<!--
-		<script src="lop_util.js"></script>
-		<script src="lop_common.js"></script>
-		<script src="lop_global.js"></script>
-		<script src="lop_ws.js"></script>
-		<script src="lop_war.js"></script>
-		<script src="lop_babylon.js"></script>
-		<script src="lop_event.js"></script>
+		<script src="_lop_util.js"></script>
+		<script src="_lop_common.js"></script>
+		<script src="_lop_global.js"></script>
+		<script src="_lop_ws.js"></script>
+		<script src="_lop_war.js"></script>
+		<script src="_lop_babylon.js"></script>
+		<script src="_lop_event.js"></script>
 		-->
-		<script src="lop.js"></script>
+		<script src="__common.js"></script>
 	</body>
 </html>
 
@@ -682,7 +682,7 @@ FLOW CHART
 ----------
 functions : W: Wait   L: Loop
 index.html
-lop_html.js
+_lop_html.js
 	initAudio();
 	loadAssets();
 		addInfoBarBase(instantiatedBaseHangar[0].mesh, 'blue');
