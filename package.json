@@ -7,7 +7,8 @@
 	},
 	"dependencies": {
 		"mysql2": "^2.3.0",
-  		"sequelize": "^6.0.0"
+  		"sequelize": "^6.0.0",
+		"ws": "^8.0.0"
 	},
 	"name": "lop",
 	"description": "League of Players",
