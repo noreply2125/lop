@@ -1,0 +1,753 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+		<!-- 
+		ISSUE : you can not achieve this with HTML headers, to prevent browsers to use cache for index.html, define these on nodejs
+		for temporary solution without nodejs, reload page via Ctrl+F5
+		-->
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+
+		<title>League of Players by Play2Win</title>
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+		<!-- ISSUE : link .css behaves differently from inline css -->
+		<link rel="stylesheet" href="web_common.css" />
+
+		<style>
+			/* CONTAINER */
+			/* "display: flex" DIV STYLE */
+			/* BUG : flex does not allow to give height and margin, use "position: absolute" DIV STYLE */
+			.flex-container-flex {
+				/* stretch and center */
+				position: absolute;
+				left: 2%;
+				right: 2%;
+				top: 2%;
+				bottom: 2%;
+
+				display: flex;
+				flex-wrap: wrap;
+
+				padding-top: 2%; /* flex system distributes vertical empty areas equally itself, margins corrupted */
+
+				border-radius: 1vmin;
+				background-color: white;
+
+				div {
+					/* portrait */
+					flex: 0 0 96%; /* width */
+					height: 10%; /* flex system distributes vertical empty areas equally itself, margins corrupted */
+					/* landscape */
+					flex: 0 0 47%; /* width */
+					height: 16%; /* look at projectSubMenus() */
+
+					margin-left: 2%;
+
+					border-radius: 1vmin;
+					background-color: white;
+					box-shadow: 1vmin 1vmin 1.5vmin rgba(0, 0, 0, 0.5);
+
+					display: flex;
+					flex-wrap: wrap;
+
+					/* most inner divs which contain atomic html elements */
+					div {
+						flex: auto;
+						margin: 0;
+						box-shadow: none;
+
+						/* center elements */
+						display: flex;
+						justify-content: center; /* horizontal */
+						align-items: center; /* vertical */
+					}
+				}
+			}
+
+			/* CONTAINER */
+			/* "position: absolute" DIV STYLE */
+			div.abs-container-primary {
+				/* white */
+				/* stretch and center */
+				position: absolute;
+				left: 2%;
+				right: 2%;
+				top: 2%;
+				bottom: 2%;
+
+				border-radius: 1vmin; /* do not use %, if not 50%, it corrupts corners */
+				background-color: white;
+			}
+			div.abs-container-secondary {
+				/* lime */
+				position: absolute;
+				/* look at projectSubMenus() */
+				width: 0%;
+				height: 0%;
+				left: 0%;
+				top: 0%;
+
+				border-radius: 1vmin;
+				xbackground-color: lime;
+			}
+			div.abs-container-last {
+				/* yellow */
+				position: absolute;
+				width: 96%;
+				height: 22.5%;
+				left: 2%;
+				top: 0%; /* calculate in html */
+
+				box-shadow: 1vmin 1vmin 1vmin rgba(0, 0, 0, 0.1);
+				border-radius: 1vmin;
+				xbackground-color: yellow;
+			}
+			.abs-container-atomic {
+				/* atomic */
+				/* most inner divs which contain atomic html elements */
+				position: absolute;
+				margin-left: 0%;
+				margin-right: 0%;
+
+				/* center elements */
+				display: flex;
+				justify-content: center; /* horizontal */
+				align-items: center; /* vertical */
+
+				border-radius: 1vmin;
+			}
+			.no-shadow {
+				box-shadow: none;
+			}
+
+			/* CHECKBOX STYLE */
+			span.lop-checkbox input[type='checkbox'] {
+				visibility: hidden;
+				display: none;
+				cursor: pointer;
+			}
+			span.lop-checkbox *,
+			span.lop-checkbox ::after,
+			span.lop-checkbox ::before {
+				box-sizing: border-box;
+			}
+			span.lop-checkbox .rocker {
+				position: relative;
+				width: 20vmin;
+				height: 11.43vmin;
+				border-bottom: 1.43vmin solid #eee;
+				font-size: 5.71vmin;
+				font-weight: bold;
+				text-align: center;
+				text-transform: uppercase;
+				display: inline-block;
+				color: #888;
+				overflow: hidden;
+			}
+			span.lop-checkbox .rocker-small {
+				font-size: 2.14vmin;
+			}
+			span.lop-checkbox .rocker::before {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 1.43vmin;
+				bottom: 0;
+				border: 1.43vmin solid #eee;
+				border-bottom: 0;
+				content: '';
+				background-color: #999;
+			}
+			span.lop-checkbox .switch-left,
+			span.lop-checkbox .switch-right {
+				position: absolute;
+				width: 8.57vmin;
+				height: 7.14vmin;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: 0s; /* BUG : also delays its disappearence on form close */
+				user-select: none;
+				cursor: pointer;
+			}
+			span.lop-checkbox .switch-left {
+				width: 7.86vmin;
+				height: 6.86vmin;
+				left: 2.43vmin;
+				bottom: 1.14vmin;
+				transform: rotate(15deg) skewX(15deg);
+				background-color: #ddd;
+			}
+			span.lop-checkbox .switch-right {
+				right: 1.43vmin;
+				bottom: 0;
+				color: white;
+				background-color: darkmagenta;
+			}
+			span.lop-checkbox .switch-left::before,
+			span.lop-checkbox .switch-right::before {
+				position: absolute;
+				width: 1.14vmin;
+				height: 7vmin;
+				bottom: -1.29vmin;
+				transform: skewY(-65deg);
+				content: '';
+				background-color: #ccc;
+			}
+			span.lop-checkbox .switch-left::before {
+				left: -1.14vmin;
+			}
+			span.lop-checkbox .switch-right::before {
+				right: -1.07vmin;
+				transform: skewY(65deg);
+				background-color: transparent;
+			}
+			span.lop-checkbox input:checked + .switch-left {
+				width: 8.57vmin;
+				height: 7.14vmin;
+				left: 1.43vmin;
+				bottom: 0vmin;
+				transform: rotate(0deg) skewX(0deg);
+				color: white;
+				background-color: magenta;
+			}
+			span.lop-checkbox input:checked + .switch-left::before {
+				width: 8.81vmin;
+				background-color: transparent;
+			}
+			span.lop-checkbox input:checked + .switch-left + .switch-right {
+				width: 7.86vmin;
+				height: 6.86vmin;
+				right: 2.29vmin;
+				bottom: 1.14vmin;
+				transform: rotate(-15deg) skewX(-15deg);
+				color: #888;
+				background-color: #ddd;
+			}
+			span.lop-checkbox input:checked + .switch-left + .switch-right::before {
+				background-color: #ccc;
+			}
+			/* Keyboard Users */
+			span.lop-checkbox input:focus + .switch-left {
+				color: #333;
+			}
+			span.lop-checkbox input:checked:focus + .switch-left {
+				color: white;
+			}
+			span.lop-checkbox input:focus + .switch-left + .switch-right {
+				color: white;
+			}
+			span.lop-checkbox input:checked:focus + .switch-left + .switch-right {
+				color: #333;
+			}
+
+			/* SELECT STYLE */
+			select.lop-select {
+				position: absolute;
+				width: 100%;
+				padding: 5%;
+				border: 1px solid silver;
+				xborder-radius: 1vmin;
+				xappearance: none; /* remove default arrow */
+				outline: 0;
+				font-size: 3.5vmin;
+				cursor: pointer;
+				color: magenta;
+				background-color: white;
+			}
+			select.lop-select::-ms-expand {
+				/* remove IE arrow */
+				display: none;
+			}
+
+			/* NEWSPAPER JUSTIFY */
+			.newspaper {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				font-size: 3vmin;
+				text-align: justify;
+				overflow: hidden;
+				color: black;
+				xbackground-color: red;
+			}
+			.newspaper:after {
+				width: 100%;
+				height: 100%;
+				display: inline-block;
+				content: '';
+			}
+
+			/* LEVELUP FORM STYLE */
+			#menu_levelup_form div.abs-container-last {
+				font-size: 3vmin; /* smaller */
+				text-align: center;
+			}
+			.current-goldxp {
+				font-size: 4vmin;
+				color: magenta;
+			}
+			.target-xp {
+				font-size: 8vmin;
+				color: grey;
+			}
+			.num-circle {
+				font-size: 8vmin;
+				text-align: center;
+				float: left;
+				border-radius: 50%;
+				color: white;
+				background-color: magenta;
+				box-sizing: border-box;
+				z-index: 9;
+			}
+			/* ISSUE : even if .target-lvl class is after .num-circle class in html, does not matter, css system looks the order here, below color suppress above color */
+			.target-lvl {
+				font-size: 8vmin;
+				transition: transform 0.5s ease; /* look at levelupAnimation() */
+				cursor: pointer;
+			}
+			.current-progress {
+				position: absolute;
+				left: 0;
+				width: 75%; /* calculate */
+				height: 100%;
+				background-color: magenta;
+			}
+			.needed-progress {
+				position: absolute;
+				right: 0;
+				width: 25%; /* calculate */
+				height: 100%;
+				background-color: #e0e0e0;
+			}
+
+			/* TOOLTIP STYLE */
+			.tooltip {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				text-align: center;
+				color: magenta;
+				visibility: hidden;
+			}
+
+			/* ACTIVE BONUS STYLE */
+			.active-bonus {
+				position: absolute;
+				right: 0vmin;
+				top: 0vmin;
+				width: 27vmin; /* do not zero, we must init (css issue), 3 letter wide, same as projectSubMenus() */
+				xheight: 9vmin;
+				font-size: 8vmin;
+				letter-spacing: 0.5vmin;
+				text-align: right;
+				overflow-wrap: break-word;
+				font-style: normal;
+				color: grey; /* white/grey */
+				xbackground-color: black;
+				visibility: hidden;
+			}
+
+			/* GAME STAT STYLE */
+			.game-stat {
+				position: absolute;
+				right: 0vmin;
+				bottom: 0vmin;
+				width: 18vmin;
+				height: 12vmin; /* same as projectSubMenus() */
+				font-size: 2.5vmin;
+				text-align: right;
+				xbackground-color: white;
+				visibility: hidden;
+			}
+
+			/* BONUS STYLE */
+			.bonus {
+				position: absolute;
+				width: 100%;
+
+				/* center both horizontal and vertical */
+				height: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				font-size: 10vmin;
+				color: magenta;
+				xbackground-color: white;
+				visibility: hidden;
+			}
+
+			/* CANVAS STYLE */
+			.canvas {
+				width: 100%;
+				height: 100%;
+				touch-action: none;
+			}
+		</style>
+	</head>
+
+	<!-- prevent mobile text selections -->
+	<body tabindex="-1" class="no-select">
+		<!--
+		SPECIAL CHARS
+		menu ≡ ♫ □ ►
+		Gold☀ XP★ HP❤ Stun🛇 AttackDamage☢ AttackSpeed» AttackHeal♥ Cooldown⧗
+		level ⁰¹²³⁴⁵⁶⁷⁸⁹
+		①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮ (charCodeAt 1+9311..15+9311)
+		© ® ™ ° ⌂ ←↑→↓↔ ↟↥↻↕ ▲►▼◄
+		∵ ● ◑ ◒ ◎ ︽ ︾
+		-->
+
+		<!-- ACTIVE BONUS div -->
+		<span id="active_bonus" class="active-bonus"><b id="ab_burj">Ⓑ</b><b id="ab_combo">②</b><b id="ab_zone">Ⓝ</b></span>
+
+		<!-- STAT div -->
+		<span id="game_stat0" class="game-stat" style="color: magenta"></span>
+		<span id="game_stat1" class="game-stat" style="color: orange"></span>
+
+		<!-- QWER MENU div -->
+		<div id="qwermenu" style="position: absolute; width: 0vmin; left: 1vmin; top: 20vmin; visibility: hidden">
+			<span class="lop-button"><span id="Q_button" class="lop-button-content lop-button-contentQWER">Q⁰</span></span>
+			<span class="lop-button"><span id="W_button" class="lop-button-content lop-button-contentQWER">W⁰</span></span>
+			<span class="lop-button"><span id="E_button" class="lop-button-content lop-button-contentQWER">E⁰</span></span>
+			<span class="lop-button"><span id="R_button" class="lop-button-content lop-button-contentQWER">R⁰</span></span>
+			<span class="lop-button"><span id="levelup_arrow" class="lop-button-content" style="color: grey" data-lang="tooltip-2">⇧</span></span>
+		</div>
+
+		<!-- MAIN MENU div -->
+		<div id="mainmenu" style="position: absolute; width: 0vmin; left: 1vmin; top: 1vmin; display: inline-block; visibility: hidden; xbackground-color: red">
+			<span id="menu_settings" class="lop-button" style="position: absolute; left: 0; transition: 0.5s; color: white"><span class="lop-button-content">≡</span></span>
+			<span id="menu_music" class="lop-button" style="position: absolute; left: 0; transition: 0.5s; color: white"><span class="lop-button-content">♫</span></span>
+			<span id="menu_fullscreen" class="lop-button" style="position: absolute; left: 0; transition: 0.5s; color: grey"><span class="lop-button-content">▣</span></span>
+			<span id="menu_toggle" class="lop-button" style="color: white"><span class="lop-button-content">↪</span></span>
+		</div>
+
+		<!-- SETTINGS MENU div -->
+		<!-- white -->
+		<div id="menu_settings_form" class="abs-container-primary" style="visibility: hidden">
+			<!-- lime -->
+			<div id="acs_1_settings" class="abs-container-secondary" style="left: 0%; top: 0%">
+				<!-- yellow's -->
+				<div class="abs-container-last" style="top: 2%">
+					<!-- atomic's -->
+					<div class="abs-container-atomic" style="width: 50%; height: 100%; left: 0%; top: 0%; justify-content: flex-start; xbackground-color: red">Show FPS</div>
+					<div class="abs-container-atomic" style="width: 50%; height: 100%; right: 0%; top: 0%; justify-content: flex-end; xbackground-color: pink">
+						<span class="lop-checkbox">
+							<label class="rocker rocker-small">
+								<!-- BUG : if client changes default state "checked", then presses F5 (without Ctrl), index.html comes from cache and default state corrupted to unchecked -->
+								<input id="menu_settings_fps" type="checkbox" checked />
+								<span class="switch-left">I</span>
+								<span class="switch-right">O</span>
+							</label>
+						</span>
+					</div>
+				</div>
+
+				<div class="abs-container-last" style="top: 26.5%">Two</div>
+				<div class="abs-container-last" style="top: 51%">Three</div>
+				<div class="abs-container-last" style="top: 75.5%">Four</div>
+			</div>
+
+			<!-- lime -->
+			<div id="acs_2_settings" class="abs-container-secondary" style="left: 0%; top: 0%">
+				<!-- yellow's -->
+				<div class="abs-container-last" style="top: 2%">
+					<!-- atomic's -->
+					<div class="abs-container-atomic" style="width: 50%; height: 100%; left: 0%; top: 0%; justify-content: flex-start; xbackground-color: red">Language</div>
+					<div class="abs-container-atomic" style="width: 50%; height: 100%; right: 0%; top: 0%; justify-content: flex-end; xbackground-color: pink">
+						<select id="select_language" class="lop-select">
+							<option value="en">English</option>
+							<option value="fr">Français</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="abs-container-last" style="top: 26.5%">Six</div>
+				<div class="abs-container-last" style="top: 51%">Seven</div>
+				<div class="abs-container-last" style="top: 75.5%">Eight</div>
+			</div>
+
+			<!-- OK atomic's -->
+			<span id="menu_settings_ok" class="lop-button lop-button-cr"><span class="lop-button-content">&crarr;</span></span>
+		</div>
+
+		<!-- LEVELUP MENU div -->
+		<!-- white -->
+		<div id="menu_levelup_form" class="abs-container-primary" style="visibility: hidden">
+			<!-- lime -->
+			<div id="acs_1_levelup" class="abs-container-secondary" style="left: 0%; top: 0%">
+				<!-- yellow's -->
+				<div class="abs-container-last" style="top: 2%">
+					<!-- Q atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-5"></span>
+					<span id="Q_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="Q_current_progress" class="current-progress"></span>
+						<span id="Q_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="Q_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="Q_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="Q_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick="">0</span>
+				</div>
+
+				<div class="abs-container-last" style="top: 26.5%">
+					<!-- W atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-6"></span>
+					<span id="W_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="W_current_progress" class="current-progress"></span>
+						<span id="W_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="W_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="W_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="W_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick="">0</span>
+				</div>
+
+				<div class="abs-container-last" style="top: 51%">
+					<!-- E atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-7"></span>
+					<span id="E_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="E_current_progress" class="current-progress"></span>
+						<span id="E_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="E_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="E_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="E_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick="">0</span>
+				</div>
+
+				<div class="abs-container-last" style="top: 75.5%">
+					<!-- R atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-8"></span>
+					<span id="R_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="R_current_progress" class="current-progress"></span>
+						<span id="R_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="R_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="R_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="R_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick="">0</span>
+				</div>
+			</div>
+
+			<!-- lime -->
+			<div id="acs_2_levelup" class="abs-container-secondary" style="left: 0%; top: 0%">
+				<!-- yellow's -->
+				<div class="abs-container-last" style="top: 2%">
+					<!-- attackSpeed atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-9"></span>
+					<span id="attackSpeed_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="attackSpeed_current_progress" class="current-progress"></span>
+						<span id="attackSpeed_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="attackSpeed_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="attackSpeed_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="attackSpeed_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick=""
+						>0</span
+					>
+				</div>
+
+				<div class="abs-container-last" style="top: 26.5%">
+					<!-- attackDamage atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-10"></span>
+					<span id="attackDamage_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="attackDamage_current_progress" class="current-progress"></span>
+						<span id="attackDamage_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="attackDamage_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="attackDamage_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="attackDamage_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick=""
+						>0</span
+					>
+				</div>
+
+				<div class="abs-container-last" style="top: 51%">
+					<!-- attackHeal atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-11"></span>
+					<span id="attackHeal_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver">0 Gold</span>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="attackHeal_current_progress" class="current-progress"></span>
+						<span id="attackHeal_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="attackHeal_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="attackHeal_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="attackHeal_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick=""
+						>0</span
+					>
+				</div>
+
+				<div class="abs-container-last" style="top: 75.5%">
+					<!-- cooldownReduction atomic's -->
+					<span class="abs-container-atomic" style="width: 100%; height: 30%; left: 0%; top: 0%; xbackground-color: red" data-lang="innerHTML-12"></span>
+					<span id="cooldownReduction_current_goldXP" class="abs-container-atomic current-goldxp" style="width: 70%; height: 30%; left: 15%; top: 30%; xbackground-color: silver"
+						>0 Gold</span
+					>
+					<div class="abs-container-atomic" style="width: 70%; height: 5%; left: 15%; top: 60%; xbackground-color: aqua">
+						<span id="cooldownReduction_current_progress" class="current-progress"></span>
+						<span id="cooldownReduction_needed_progress" class="needed-progress"></span>
+					</div>
+					<div class="abs-container-atomic target-xp" style="width: 70%; height: 35%; left: 15%; top: 65%; xbackground-color: silver">
+						<span id="cooldownReduction_needed_goldXP" class="newspaper">0 0 0</span>
+					</div>
+					<span id="cooldownReduction_current_level" class="abs-container-atomic num-circle" style="width: 13%; height: 63%; left: 1%; top: 35%; xbackground-color: pink">0</span>
+					<span id="cooldownReduction_next_level" class="abs-container-atomic num-circle target-lvl" style="width: 13%; height: 63%; right: 1%; top: 35%; xbackground-color: pink" onclick=""
+						>0</span
+					>
+				</div>
+			</div>
+
+			<!-- OK atomic's -->
+			<span id="menu_levelup_ok" class="lop-button lop-button-cr"><span class="lop-button-content">&crarr;</span></span>
+		</div>
+
+		<!-- TOOLTIP div -->
+		<div>
+			<span id="tooltip" class="tooltip"></span>
+		</div>
+
+		<!-- BONUS div -->
+		<div>
+			<span id="bonus" class="bonus"></span>
+		</div>
+
+		<!-- COVER div -->
+		<div id="cover" class="background-page">
+			<img id="cover_img" src="" />
+			<span id="cover_info" class="background-page-info"></span>
+		</div>
+
+		<!-- CANVAS -->
+		<canvas id="canvas" class="canvas" touch-action="none"></canvas>
+		<!-- touch-action="none" for best results from PEP -->
+
+		<!-- IMPORT scripts -->
+
+		<!-- Replace `cdn` with `preview` in both links below to use the latest versions -->
+		<!-- Replace `babylon.js` with `babylon.max.js` below for the non-minified (readable) version -->
+		<!-- Remove `.min` from the file name below for the non-minified (readable) version -->
+		<!--
+		<script src="https://cdn.babylonjs.com/babylon.js"></script>
+		<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+		<script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+		-->
+		<script src="babylon.js"></script>
+		<script src="babylonjs.loaders.min.js"></script>
+		<script src="pep.js"></script>
+		<!-- babylon.gui.js for 3D GUI -->
+		<script src="babylon.gui.js"></script>
+		<!-- earcut.js for 3D text -->
+		<script src="earcut.js"></script>
+
+		<!-- lop -->
+		<!-- ISSUE : THE BELOW ORDER IS IMPORTANT FOR MOBILE CHROME, INSPECT VIA PC, AND USE THIS ORDER IN COMBINED lop.js TOO -->
+		<!-- ISSUE is bigger than that, mobile chrome can not do async .js include, use our loadScriptAll() as sync true -->
+		<!--
+		<script src="lop_util.js"></script>
+		<script src="lop_common.js"></script>
+		<script src="lop_global.js"></script>
+		<script src="lop_ws.js"></script>
+		<script src="lop_war.js"></script>
+		<script src="lop_babylon.js"></script>
+		<script src="lop_event.js"></script>
+		-->
+		<script src="lop.js"></script>
+	</body>
+</html>
+
+<!--
+
+FLOW CHART
+----------
+functions : W: Wait   L: Loop
+index.html
+lop_html.js
+	initAudio();
+	loadAssets();
+		addInfoBarBase(instantiatedBaseHangar[0].mesh, 'blue');
+		addInfoBarTurret(instantiatedTurret);
+		W getFirstClientClick();
+		addGround();
+			pixelperUnit();
+			assignParentToImportedMeshes(ground);
+			groundRelated();
+				generatePath();
+				rangesOnPaths(hxTurretClient);
+					getRangeOnPath(hxTurret, pointsOnPathTopRed);
+		L beginWar();
+			L send6Tanks();
+				sendTankToWar(0, 'blue', 'top');
+					getTankFromHangar(typ, color);
+						instantiateTask('task_' + name, name + '_' + hxTank);
+						addInfoBarTank(instantiatedTank.mesh);
+					generateAnimation(hxTank, instantiatedTankHangar[hxTank].mesh, pointsOnPath, pathDuration, '' + hxTank);
+						generateAnimationKeys(pointsOnPath, pathDuration);
+						AnimationEvent(
+							fireAtWill(whom, ttHangar, ttInRange, hxTurret, hxTTTarget, hpQWER = 0, area = false);
+							sendTankToHangar(ttInRange[i]);
+						);
+		hideCover();
+----------
+events :
+	window.onload
+		orientationLandscape();
+		projectSubMenus();
+	window.onresize
+		orientationLandscape();
+		projectSubMenus();
+	span.onclick
+		levelupAnimation(this.id, value);
+	scene.onPointerObservable.add POINTERMOVE
+		cameraMove();
+		screenExceed(scene.pointerX, scene.pointerY);
+	scene.onPointerObservable.add POINTERUP
+		rangesOnPaths(hxTurretClient);
+----------
+concepts :
+	HTML
+	CSS
+	UI
+	Babylon 3D
+	Math
+	Game
+	Technical (NodeJS, AWS, DB, Android webview, IOS webview)
+	Backend (online synchronizing)
+----------
+websocket :
+populateWRandom();
+c-send typ: 'init'
+	s-send typ: 'hxTurret'
+		hxTurretClient = obj.hxTurret;
+			c-send typ: 'ready' with state (only wRandom filled)
+				gameObj.state = obj.state;
+					s-send typ: 'start' with state
+						state = obj.state;
+						applyState();
+						beginWar();
+	s-send typ: 'state-request' (if client late init)
+		c-send typ: 'state'
+			gameObj.state = obj.state;
+----------
+
+-->
