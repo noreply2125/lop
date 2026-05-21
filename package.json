@@ -1,0 +1,13 @@
+{
+	"main": "server.js",
+	"scripts": {
+		"build": "tsc",
+		"start": "node dist/server.js",
+		"migrate": "sequelize db:migrate"
+	},
+	"name": "lop",
+	"description": "League of Players",
+	"version": "1.0.0",
+	"author": "",
+	"license": "ISC"
+}
