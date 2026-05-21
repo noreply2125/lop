@@ -1,0 +1,145 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+		<!-- 
+		ISSUE : you can not achieve this with HTML headers, to prevent browsers to use cache for index.html, define these on nodejs
+		for temporary solution without nodejs, reload page via Ctrl+F5
+		-->
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+
+		<title>League of Players by Play2Win</title>
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+		<!-- ISSUE : link .css behaves differently from inline css -->
+		<link rel="stylesheet" href="web_common.css" />
+
+		<style>
+			/* WEBMENU-REGISTER STYLE */
+			.wm-form-background {
+				position: absolute;
+				width: 70vmin;
+				height: 85vmin;
+
+				/* TRICK : center form via left-top and transform */
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+
+				xpadding: 50px 35px;
+				border-radius: 10px;
+				border: 2px solid rgba(255, 255, 255, 0.1);
+				box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+				backdrop-filter: blur(10px);
+				background-color: rgba(255, 255, 255, 0.13);
+				color: white;
+
+				z-index: 2;
+				display: none;
+			}
+			.wm-form-caption {
+				position: absolute;
+				top: 15%;
+				left: 8vmin;
+				font-size: 5vmin;
+			}
+			.wm-form-cancel {
+				position: absolute;
+				top: 1vmin;
+				right: 1vmin;
+				padding: 1.6vmin 3.5vmin;
+				border-radius: 1vmin;
+				border: none;
+				background-color: darkmagenta;
+				font-size: 4vmin;
+				font-weight: bold;
+				color: white;
+				cursor: pointer;
+			}
+			.wm-form-account {
+				position: absolute;
+				bottom: 0.6vmin;
+				right: 1vmin;
+				font-size: 3vmin;
+				color: silver !important;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+
+	<!-- prevent mobile text selections -->
+	<body tabindex="-1" class="no-select">
+		<div id="background_page" class="background-page"></div>
+
+		<div id="wm_form_register" class="wm-form-background">
+			<span class="wm-form-cancel">✕</span>
+			<span id="wm_register_caption" class="wm-form-caption">Register</span>
+			<form id="form_register" action="/ajaxregister">
+				<input id="wm_register_clientname" type="text" placeholder="Nickname" class="lop-input" style="top: 30%" />
+				<input id="wm_register_password" type="password" placeholder="Password" class="lop-input" style="top: 42%" />
+				<input id="wm_register_password2" type="password" placeholder="Re-Password" class="lop-input" style="top: 54%" />
+				<!--
+				<input id="wm_register_email" type="email" placeholder="Email" class="lop-input" style="top: 66%" />
+				-->
+			</form>
+			<span id="wm_register_ok" class="lop-button lop-button-cr"><span class="lop-button-content">&crarr;</span></span>
+		</div>
+
+		<div id="wm_form_login" class="wm-form-background">
+			<span class="wm-form-cancel">✕</span>
+			<span id="wm_register_caption" class="wm-form-caption">Login</span>
+			<form id="form_login" action="/ajaxlogin">
+				<input id="wm_login_clientname" name="clientName" type="text" placeholder="Nickname" class="lop-input" style="top: 30%" />
+				<input id="wm_login_password" name="password" type="password" placeholder="Password" class="lop-input" style="top: 42%" />
+			</form>
+			<span id="wm_login_ok" class="lop-button lop-button-cr"><span class="lop-button-content">&crarr;</span></span>
+		</div>
+
+		<div id="wm_form_account" class="wm-form-background">
+			<span class="wm-form-cancel">✕</span>
+			<span id="wm_register_caption" class="wm-form-caption">Account</span>
+			<form id="form_account" action="/ajaxaccount">
+				<input id="wm_account_clientname" type="text" placeholder="Nickname" class="lop-input" style="top: 30%" />
+				<input id="wm_account_password" type="password" placeholder="Password" class="lop-input" style="top: 42%" />
+				<input id="wm_account_newpassword" type="password" placeholder="New Password" class="lop-input" style="top: 54%" />
+				<input id="wm_account_newpassword2" type="password" placeholder="Re-New Password" class="lop-input" style="top: 66%" />
+				<!--
+				<input id="wm_account_email" type="email" placeholder="Email" class="lop-input" style="top: 66%" />
+				-->
+			</form>
+			<span id="wm_account_ok" class="lop-button lop-button-cr"><span class="lop-button-content">&crarr;</span></span>
+		</div>
+
+		<div id="wm_keyboard" class="wm-form-background">
+			<div style="position: absolute; width: 52.5vmin; height: 40.5vmin; left: 8.75vmin; top: 8.75vmin; xbackground-color: yellow">
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 0vmin; top: 0vmin"><span id="kb_logout" class="lop-button-content">☚</span></span>
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 13.5vmin; top: 0vmin"><span id="kb_register" class="lop-button-content">✎</span></span>
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 27vmin; top: 0vmin"><span id="kb_login" class="lop-button-content">☛</span></span>
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 0vmin; top: 13.5vmin"><span id="kb_help" class="lop-button-content">?</span></span>
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 13.5vmin; top: 13.5vmin"><span id="kb_forum" class="lop-button-content">☻</span></span>
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 27vmin; top: 13.5vmin"><span id="kb_rank" class="lop-button-content">≛</span></span>
+
+				<span class="lop-button lop-button-wm" style="position: absolute; width: 39vmin !important; left: 0vmin; top: 27vmin">
+					<span id="kb_shop" class="lop-button-content" style="font-size: 3.5vmin">store</span>
+				</span>
+				<span class="lop-button lop-button-wm" style="position: absolute; left: 40.5vmin; top: 0vmin">
+					<span id="kb_single" class="lop-button-content" style="font-size: 7vmin !important">▶</span>
+				</span>
+				<span class="lop-button lop-button-wm" style="position: absolute; height: 25.5vmin !important; left: 40.5vmin; top: 13.5vmin">
+					<!-- ⏩︎✕ -->
+					<span id="kb_play" class="lop-button-content">⏩︎</span>
+				</span>
+			</div>
+
+			<div id="kb_play_wait" style="position: absolute; right: 8.75vmin; top: 50vmin; font-size: 3.5vmin; color: silver; xbackground-color: lime; display: none"></div>
+			<div id="kb_account" class="wm-form-account"><span id="kb_account_name"></span><span style="font-size: 4vmin !important">&nbsp;Ω</span></div>
+			<div style="position: absolute; left: 2vmin; bottom: 1vmin; font-size: 3vmin; color: grey">© leagueofplayers.net</div>
+		</div>
+
+		<!-- IMPORT scripts -->
+		<script src="web.js"></script>
+	</body>
+</html>
