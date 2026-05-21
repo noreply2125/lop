@@ -6,6 +6,7 @@
 		"migrate": "sequelize db:migrate"
 	},
 	"dependencies": {
+		"mysql2": "^2.3.0",
   		"sequelize": "^6.0.0"
 	},
 	"name": "lop",
